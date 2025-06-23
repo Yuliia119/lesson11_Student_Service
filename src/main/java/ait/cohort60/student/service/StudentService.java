@@ -25,4 +25,7 @@ public interface StudentService {
 
     List<StudentDto> findStudentByExamNameMinScore (String examName, Integer minScore);
 
+
+
+
 }

@@ -55,4 +55,6 @@ public  class StudentController {
     public List<StudentDto> findStudentByExamNameMinScore(@PathVariable String examName, @PathVariable Integer minScore) {
         return studentService.findStudentByExamNameMinScore(examName, minScore);
     }
+
+
 }
