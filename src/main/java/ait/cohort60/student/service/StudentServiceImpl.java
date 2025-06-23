@@ -7,42 +7,45 @@ import ait.cohort60.student.dto.StudentDto;
 import ait.cohort60.student.dto.StudentUpdateDto;
 import ait.cohort60.student.dto.exceptions.NotFoundExeption;
 import ait.cohort60.student.model.Student;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Component
+@Service
+@RequiredArgsConstructor
 public class StudentServiceImpl implements StudentService {
-    @Autowired
-    private StudentRepository studentRepository;
 
-    @Override
+    private final StudentRepository studentRepository;
+
+    @Override    // добавляем нового студента
     public Boolean addStudent(StudentCredentialsDto studentCredentialsDto) {
         if (studentRepository.findById(studentCredentialsDto.getId()).isPresent()) {
             return false;
         }
         Student student = new Student(studentCredentialsDto.getId(), studentCredentialsDto.getName(), studentCredentialsDto.getPassword());
-        studentRepository.save(student);
+        studentRepository.save(student); //сохраняем студента
         return true;
     }
 
-    @Override
+    @Override  /// ищем инфу о студенте по ID
     public StudentDto findStudent(Long id) {
         Student student = studentRepository.findById(id).orElseThrow(NotFoundExeption::new);
         return new StudentDto(student.getId(), student.getName(), student.getScores());
     }
 
-    @Override
+    @Override  /// удаление студента
     public StudentDto removeStudent(Long id) {
         Student student = studentRepository.findById(id).orElseThrow(NotFoundExeption::new);
-        studentRepository.deleteByid(id);
+        studentRepository.deleteById(id);
         return new StudentDto(student.getId(), student.getName(), student.getScores());
     }
 
-    @Override
+    @Override  /// обновляет имя и пароль студента
     public StudentCredentialsDto updateStudent(Long id, StudentUpdateDto studentUpdateDto) {
         Student student = studentRepository.findById(id).orElseThrow(NotFoundExeption::new);
         if (studentUpdateDto.getName() != null) {
@@ -55,34 +58,32 @@ public class StudentServiceImpl implements StudentService {
         return new StudentCredentialsDto(student.getId(), student.getName(), student.getPassword());
     }
 
-    @Override
+    @Override  /// добавляет новый экзамен и бал студента
     public Boolean addScore(Long id, ScoreDto scoreDto) {
         Student student = studentRepository.findById(id).orElseThrow(NotFoundExeption::new);
-        student.getScores().put(scoreDto.getExamName(), scoreDto.getScore());
+        Boolean res = student.addScore(scoreDto.getExamName(), scoreDto.getScore());
         studentRepository.save(student);
-        return true;
+        return res;
     }
 
-    @Override
+    @Override  /// находит студента по имени
     public List<StudentDto> findStudentByName(String name) {
-        return studentRepository.findAll().stream()
-                .filter(student -> student.getName().equalsIgnoreCase(name))
+        return studentRepository.findByNameIgnoreCase(name)
                 .map(student -> new StudentDto(student.getId(), student.getName(), student.getScores()))
                 .toList();
     }
 
-    @Override
+    @Override /// считает студентов с определёнными именами
     public Long countStudentByName(Set<String> names) {
-        return studentRepository.findAll().stream()
-                .filter(student -> names.contains(student.getName()))
-                .count();
+        return studentRepository.countByNameIn(names);
     }
 
-    @Override
+    @Override  ///  находит студентов с оценками по предмету
     public List<StudentDto> findStudentByExamNameMinScore(String examName, Integer minScore) {
-        return studentRepository.findAll().stream()
-                .filter(student -> student.getScores().getOrDefault(examName, 0) >= minScore)
+        return studentRepository.findByExamScoreGreaterThan(examName, minScore)
+                .stream()
                 .map(student -> new StudentDto(student.getId(), student.getName(), student.getScores()))
                 .toList();
     }
+
 }

@@ -14,3 +14,4 @@ public class StudentCredentialsDto {
 
 }
 ///  Добавляем студента
+/// Это запросы POST и PUT
