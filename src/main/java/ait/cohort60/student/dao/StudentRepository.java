@@ -1,4 +1,4 @@
-package ait.cohort60.student.controler.dao;
+package ait.cohort60.student.dao;
 
 import ait.cohort60.student.model.Student;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 public interface StudentRepository extends MongoRepository<Student, Long> {
-    Stream<Student> findByNameIgnoreCase(String name);
+    Optional<Student> findByNameIgnoreCase(String name);
 
     long countByNameIn(Set<String> names);
 

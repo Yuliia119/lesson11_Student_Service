@@ -1,6 +1,6 @@
 package ait.cohort60.student.service;
 
-import ait.cohort60.student.controler.dao.StudentRepository;
+import ait.cohort60.student.dao.StudentRepository;
 import ait.cohort60.student.dto.ScoreDto;
 import ait.cohort60.student.dto.StudentCredentialsDto;
 import ait.cohort60.student.dto.StudentDto;
@@ -9,13 +9,10 @@ import ait.cohort60.student.dto.exceptions.NotFoundExeption;
 import ait.cohort60.student.model.Student;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +23,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override    // добавляем нового студента
     public Boolean addStudent(StudentCredentialsDto studentCredentialsDto) {
-        if (studentRepository.findById(studentCredentialsDto.getId()).isPresent()) {
+        if (studentRepository.existsById(studentCredentialsDto.getId())) {
             return false;
         }
         //Student student = new Student(studentCredentialsDto.getId(), studentCredentialsDto.getName(), studentCredentialsDto.getPassword());
@@ -72,8 +69,8 @@ public class StudentServiceImpl implements StudentService {
     @Override  /// находит студента по имени
     public List<StudentDto> findStudentByName(String name) {
         return studentRepository.findByNameIgnoreCase(name)
-                .map(student -> modelMapper.map(student, StudentDto.class))
-                .toList();
+                .map(student -> List.of(modelMapper.map(student, StudentDto.class)))
+                .orElse(List.of());
     }
 
     @Override /// считает студентов с определёнными именами
